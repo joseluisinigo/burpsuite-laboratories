@@ -4,7 +4,7 @@ This lab's verbose error messages reveal that it is using a vulnerable version o
 
 Simplemente forzamos el error cambiando la id del producto por una cadena
 
-![](2022-07-05-11-40-04.png)
+![](assets/2022-07-05-11-40-04.png)
 
 ## Lab: Information disclosure on debug page
 
@@ -12,7 +12,7 @@ This lab contains a debug page that discloses sensitive information about the ap
 
 Mirando el código de la página aparece comentado  /cgi-bin/phpinfo.php por lo que enviamos esta petición y buscamos secret_key, aparece.
 
-![](2022-07-05-11-52-54.png)
+![](assets/2022-07-05-11-52-54.png)
 
 ## Source code disclosure via backup files
 
@@ -20,7 +20,7 @@ This lab leaks its source code via backup files in a hidden directory. To solve 
 
 Simplemente he puesto el backup al final y me ha salido el código de la copia de seguirdad con su password
 
-![](2022-07-05-12-02-09.png)
+![](assets/2022-07-05-12-02-09.png)
 
 ## Authentication bypass via information disclosure
 
@@ -41,7 +41,7 @@ X-Custom-IP-Authorization: 127.0.0.1
 X-Custom-IP-Authorization: 127.0.0.1
 ```
 
-![](2022-07-05-12-26-04.png)
+![](assets/2022-07-05-12-26-04.png)
 
 ## Information disclosure in version control history
 
@@ -60,7 +60,7 @@ git log
 git show ..... 
 ```
 
-![](2022-07-05-12-36-44.png)
+![](assets/2022-07-05-12-36-44.png)
 
 
 Usamos para entrar Administrator : qa8h2cym7u6mn739f20r
