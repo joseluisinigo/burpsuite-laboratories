@@ -23,6 +23,32 @@ To solve the lab, log in as the administrator user.
 
 
 
+```mermaid
+flowchart LR
+    A[Traking id, ...xyz' and '1'='1' ...xyz' and '1'='2'] -->|Resultados diferentes| B{ Sql Injection}
+    A -->|Mismos resultados| C{Blind SQL Injection}
+    C-->|conditionals error| J[usar errorres condicionales, los resultados son diferentes]
+    J-->|No vemos errores, siempre 200. Usamos time delay|K[Time delay]
+    K-->|responde tiempos diferentes|E
+    K-->|No responde a diferentes errores|M[Usamos out-of-band data exfiltration]
+    M-->E
+
+    J-->E
+    C -->|Error 400| D{No hay sqlinjection}
+    C -->|200| E[Existe la tabla?]
+    B --> E
+    E -->|NO|E
+    E -->F[Existe el usuario?]
+    F -->|NO|F
+    F -->G[Obtener la clave]
+    G -->|1|H[Tamaño con intruder]
+    G -->|2|I[Obtener la clave comparando ataque cluster bomb]
+    H -->I
+ 
+
+```
+
+
 ### 1. Mirar nuestra cookie
 
 TrackingId
