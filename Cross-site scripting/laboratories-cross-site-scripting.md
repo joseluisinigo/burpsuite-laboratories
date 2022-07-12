@@ -1,17 +1,5 @@
 # Laboratories cross-site scripting
 
-## Lab: Exploiting cross-site scripting to steal cookies
-
-This lab contains a stored XSS vulnerability in the blog comments function. A simulated victim user views all comments after they are posted. To solve the lab, exploit the vulnerability to exfiltrate the victim's session cookie, then use this cookie to impersonate the victim.
-
-Analizando la web podemos ver:
-- disponemos de nuestra cookie
-- Tenemos un formulario de logueo sin la opción de forget password
-- comentarios
-
-
-La idea es que nos manden a burpcollaborator la cookie quien lea el post. Se sobre entiende que tendrán una acción para ver los comentarios. Una vez robada la cookie tendremos que susituir nuestra cookie.
-
 ```mermaid
 flowchart 
  classDef green color:#022e1f,fill:#00f500;
@@ -33,6 +21,18 @@ J-->|Si|K[Tenemos mail o user]
 J-->|NO|L[no podemos asignarnos el csrf de la victima]:::red
 K-->M[Escribimos un comentario con un script que haga lo siguiente\n 1.cargar la página o las paginas hasta llegar donde se cambia\n2.extraemos el csrf\n3.Mandamos una petición post con el csrf y nuestro email o nombre]:::green
 ```
+
+## Lab: Exploiting cross-site scripting to steal cookies
+
+This lab contains a stored XSS vulnerability in the blog comments function. A simulated victim user views all comments after they are posted. To solve the lab, exploit the vulnerability to exfiltrate the victim's session cookie, then use this cookie to impersonate the victim.
+
+Analizando la web podemos ver:
+- disponemos de nuestra cookie
+- Tenemos un formulario de logueo sin la opción de forget password
+- comentarios
+
+
+La idea es que nos manden a burpcollaborator la cookie quien lea el post. Se sobre entiende que tendrán una acción para ver los comentarios. Una vez robada la cookie tendremos que susituir nuestra cookie.
 
 1. Probamos si es inyectable un javascript
 Insertamos en un comentario esto, para ver si nos carga a nosotros ese javascript
