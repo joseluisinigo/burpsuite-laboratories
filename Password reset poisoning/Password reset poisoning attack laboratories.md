@@ -1,5 +1,29 @@
 # Password reset poisoning Laboratories
 
+```mermaid
+flowchart 
+
+   classDef green color:#022e1f,fill:#00f500;
+   classDef red color:#022e1f,fill:#f11111;
+   classDef white color:#022e1f,fill:#fff;
+   classDef black color:#fff,fill:#000;
+
+    A[Password reset poisoining]:::black-->B[forgot password]
+    A-->|No user or mail victim|E{Not Reset poisoning}:::red
+    B-->|Return token|C[change host for burpcollaborator and change name to victim]
+    B-->|Without token and satinize dom|D[via dangling markup]
+    C-->F[view log]
+    F-->|Return token|G[change token victim]
+    G-->H[restore password victim]:::green
+    F-->|Not accept change host|I[add second host Poisoning middleware]
+    I-->F
+    D-->J[add exploit with url exploit server in the port position]
+    J-->K[log and view password]
+    K-->H
+    
+    
+```
+
 This lab is vulnerable to password reset poisoning. The user carlos will carelessly click on any links in emails that he receives. To solve the lab, log in to Carlos's account.
 
 You can log in to your own account using the following credentials: wiener:peter. Any emails sent to this account can be read via the email client on the exploit server.
@@ -84,7 +108,7 @@ This lab is vulnerable to password reset poisoning via dangling markup. To solve
 You can log in to your own account using the following credentials: wiener:peter. Any emails sent to this account can be read via the email client on the exploit server.
 
 
-Este tipo de ejercicios también es facil. En prinipio cuando hacemos la peticion de restablecimiento no nos devuelve un token por lo que por ese sitio no podemos ir.
+Este tipo de ejercicios también es facil. En principio cuando hacemos la peticion de restablecimiento no nos devuelve un token por lo que por ese sitio no podemos ir.
 
 ![](assets/2022-07-11-18-56-59.png)
 
