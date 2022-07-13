@@ -1,25 +1,62 @@
 # Laboratories cross-site scripting
 
 ```mermaid
-flowchart 
- classDef green color:#022e1f,fill:#00f500;
+flowchart LR
+
+   classDef green color:#022e1f,fill:#00f500;
    classDef red color:#022e1f,fill:#f11111;
    classDef white color:#022e1f,fill:#fff;
    classDef black color:#fff,fill:#000;
-A[Buscamos donde podemos ingresar el exploit]-->B[Añadir exploit alert]
-B-->|Si explotable|C[Mandamos exploit a nuestro collaborator con lo que necesitemos]
-B-->|NO|D[No es explotable a priori]:::red
-E-->F[Cambiar la cookie que recibimos]:::green
-C-->|Si Funcionan las cookies|G[steal cookies]
-G-->E[Mirar resultado del collaborator]
-C-->|2. Probamos robar las claves si tienen autocompletador|H[capture password]
-H-->I[Mirar collaborator e identificarse]:::green
-H-->|Si no funciona probar varias veces reiniciar collaborator|H
+   classDef xss fill:#f9f,stroke:#333,stroke-width:4px;
 
-C-->|Tiene csrf|J[Exploiting XSS to perform CSRF]
-J-->|Si|K[Tenemos mail o user]
-J-->|NO|L[no podemos asignarnos el csrf de la victima]:::red
-K-->M[Escribimos un comentario con un script que haga lo siguiente\n 1.cargar la página o las paginas hasta llegar donde se cambia\n2.extraemos el csrf\n3.Mandamos una petición post con el csrf y nuestro email o nombre]:::green
+subgraph xss
+direction TB
+  A1{XSS}:::white-->B1[Vulnerable directamente en url]
+  B1-->|Si|C1{Reflected XSS}:::white
+  B1-->|No|Z{Stored xss}:::white
+  B1-->|Podemos hacer que la victima ejecute un comando?|D1{self XSS}:::white
+  B1-->E1{DOM XXS}:::white
+
+
+
+subgraph xxs_stored
+  direction TB
+  Z-->A
+  A[Buscamos donde podemos ingresar el exploit]-->B[Añadir exploit alert]
+  B-->|Si explotable|C[Mandamos exploit a nuestro collaborator con lo que necesitemos]
+  B-->|NO|D[No es explotable a priori]:::red
+  E-->F[Cambiar la cookie que recibimos]:::green
+  C-->|Si Funcionan las cookies|G[steal cookies]
+  G-->E[Mirar resultado del collaborator]
+  C-->|2. Probamos robar las claves si tienen autocompletador|H[capture password]
+  H-->I[Mirar collaborator e identificarse]:::green
+  H-->|Si no funciona probar varias veces reiniciar collaborator|H
+
+  C-->|Tiene csrf|J[Exploiting XSS to perform CSRF]
+  J-->|Si|K[Tenemos mail o user]
+  J-->|NO|L[no podemos asignarnos el csrf de la victima]:::red
+  K-->M[Escribimos un comentario con un script que haga lo siguiente\n 1.cargar la página o las paginas hasta llegar donde se cambia\n2.extraemos el csrf\n3.Mandamos una petición post con el csrf y nuestro email o nombre]:::green
+  
+  end
+
+subgraph xss_reflect
+    direction TB
+    C1-->B2[Intentamos poner un alert en algun sitio que pueda ver la victima ]
+    B2-->|Si|C2[Probamos otro tipo de xss]
+    B2-->|NO|D2[NO funciona ni resuelve el script]
+    D2-->|Funciona un alert directamente en la url|E2[Reflected XSS]
+    D2-->|No funciona directamente|F2[Try XSS stored] 
+    D2-->|Podemos hacer que la victima ejecute un comando?|G2[self XSS]
+    end  
+ subgraph XXS_DOM
+  direction TB
+  E1-->A3[use dom invader for view exploit]
+  A3-->|Está en el input?|B3[Atacar directamente cerrando el input]
+  A3-->|Está dentro de un select|C3[manda cadena con parámetros cerrando el select y luego explotando]
+  end
+
+end 
+
 ```
 
 ## Lab: Exploiting cross-site scripting to steal cookies
@@ -188,3 +225,4 @@ function handleResponse() {
 };
 </script>
 ```
+
