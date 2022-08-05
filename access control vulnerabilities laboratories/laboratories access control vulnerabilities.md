@@ -116,11 +116,58 @@ This lab implements access controls based partly on the HTTP method of requests.
 
 To solve the lab, log in using the credentials wiener:peter and exploit the flawed access controls to promote yourself to become an administrator.
 
--nos deja ver el admin pero necesitamos que wiener sea administrador
+- administrator:admin
+- wiener:peter
 
-Entrando como administrador en el panel de control podemos hacer que wiener se administrador , entiendo que realmente quiere que lo hagamos con burpsuite
-![](assets/2022-07-20-09-08-12.png)
+```mermaid
+flowchart TD
+A[Nos logueamos como Admin</br>Capturamos el admin-roles</br>Upgrade wiener</br>Cambiamos a POST]
+B[Abrimos un laboratorio nuevo]-->C[Nos logueamos como wiener]-->D[Capturamos la cookie]
+A-->D-->E[Usamos la cookie de wiener en la pagina interceptada como admin]
 
-La url es admin-roles
+```
 
-![](assets/2022-07-20-09-09-49.png)
+
+![](assets/2022-08-05-11-46-53.png)
+
+## Lab: User ID controlled by request parameter
+
+This lab has a horizontal privilege escalation vulnerability on the user account page.
+
+To solve the lab, obtain the API key for the user carlos and submit it as the solution.
+
+You can log in to your own account using the following credentials: wiener:peter
+
+
+
+No hace falta nada mas que logueranos, vemos en myaccount arriba el id de wiener, lo cambiamos por carlos , actualizamos y mandamos la apikey
+
+![](assets/2022-08-05-12-02-28.png)
+
+
+
+
+## Lab: User ID controlled by request parameter, with unpredictable user IDs
+
+Esta opción no es tan obvia, pero podemos encontrar la guid de carlos en un post del blog por ejemplo
+
+```html
+blogs?userId=259ac446-1644-4e8b-8f0d-eadf7047350d
+```
+
+Cambiamos en la url de myaccount la guid de carlos y resolvemos enviando la apikey
+
+![](assets/2022-08-05-12-07-21.png)
+
+## Lab: User ID controlled by request parameter with data leakage in redirect
+This lab contains an access control vulnerability where sensitive information is leaked in the body of a redirect response.
+
+To solve the lab, obtain the API key for the user carlos and submit it as the solution.
+
+You can log in to your own account using the following credentials: wiener:peter
+
+En este caso cambiando la id por carlos no nos funciona directamente , pero si lo capturamos con burpsuite podemos ver el código antes de que nos redireccione
+
+![](assets/2022-08-05-12-13-24.png)
+
+![](assets/2022-08-05-12-13-42.png)
